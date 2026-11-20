@@ -15,34 +15,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
-      - name: Set up Android SDK
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
 
       - name: Install Android SDK packages
         run: |
           yes | sdkmanager --licenses
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-            - name: Extract SIMARAN project
+      - name: Find and extract project ZIP
         run: |
           mkdir project
-          ZIP_FILE=$(find . -type f -iname "*.zip" -not -path "./.git/*" | head -n 1)
+          ZIP_FILE=$(find . -maxdepth 2 -type f -iname "*.zip" -not -path "./.git/*" | head -n 1)
           if [ -z "$ZIP_FILE" ]; then
             echo "Project ZIP not found"
-            ls -la
+            find . -maxdepth 3 -type f
             exit 1
           fi
-          echo "Found ZIP: $ZIP_FILE"
+          echo "Found: $ZIP_FILE"
           unzip -q "$ZIP_FILE" -d project
+
       - name: Install Gradle
         run: |
           curl -L https://services.gradle.org/distributions/gradle-8.9-bin.zip -o gradle.zip
@@ -57,4 +52,5 @@ jobs:
         with:
           name: SIMARAN-debug-APK
           path: project/app/build/outputs/apk/debug/app-debug.apk
+          
           
