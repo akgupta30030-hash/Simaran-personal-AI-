@@ -32,11 +32,17 @@ jobs:
           yes | sdkmanager --licenses
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Extract SIMARAN project
+            - name: Extract SIMARAN project
         run: |
           mkdir project
-          unzip -q SIMARAN_Android_Project_v2.zip -d project
-
+          ZIP_FILE=$(find . -type f -iname "*.zip" -not -path "./.git/*" | head -n 1)
+          if [ -z "$ZIP_FILE" ]; then
+            echo "Project ZIP not found"
+            ls -la
+            exit 1
+          fi
+          echo "Found ZIP: $ZIP_FILE"
+          unzip -q "$ZIP_FILE" -d project
       - name: Install Gradle
         run: |
           curl -L https://services.gradle.org/distributions/gradle-8.9-bin.zip -o gradle.zip
